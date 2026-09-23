@@ -4,4 +4,26 @@ version = "0.1.0"
 description = "..."
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = ["django>=6.1.1"]
+
+[dependency-groups]
+dev = [
+  "django-stubs>=6.1.1",
+  "django-stubs-ext>=6.1.1",
+  "pyright>=1.1.414",
+  "ruff>=0.16.8",
+]
+
+[tool.pyright]
+pythonVersion = "3.14"
+typeCheckingMode = "standard"
+venvPath = "."
+venv = ".venv"
+
+[tool.ruff]
+line-length = 100
+cache-dir = ".cache/ruff"
+fix = true
+
+[tool.ruff.lint.extend-per-file-ignores]
+"**/migrations/*.py" = ["RUF012"]
