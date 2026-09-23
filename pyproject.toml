@@ -11,6 +11,8 @@ dev = [
   "django-stubs>=6.1.1",
   "django-stubs-ext>=6.1.1",
   "pyright>=1.1.414",
+  "pytest>=9.1.1",
+  "pytest-django>=4.14.0",
   "ruff>=0.16.8",
 ]
 
@@ -27,3 +29,10 @@ fix = true
 
 [tool.ruff.lint.extend-per-file-ignores]
 "**/migrations/*.py" = ["RUF012"]
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "--maxfail=1 --tb=line --no-header"
+console_output_style = "times"
+cache_dir = ".cache/pytest"
+DJANGO_SETTINGS_MODULE = "conf.settings"
