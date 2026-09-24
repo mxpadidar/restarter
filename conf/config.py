@@ -16,6 +16,7 @@ class Config(BaseSettings):
     app_version: str = "0.1.0"
     django_secret: str = "change-me"
     django_allowed_hosts: list[str] = []
+    log_level: str = "INFO"
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",

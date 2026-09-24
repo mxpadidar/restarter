@@ -1,10 +1,19 @@
 from .config import get_config
+from .logging import setup_logging
 
 config = get_config()
 
 SECRET_KEY = config.django_secret
 DEBUG = config.debug
 ALLOWED_HOSTS = config.django_allowed_hosts
+
+setup_logging(
+    log_dir=config.base_dir / "logs",
+    level=config.log_level,
+    diagnose=config.debug,
+)
+
+LOGGING_CONFIG = None
 
 TIME_ZONE = "UTC"
 
@@ -42,6 +51,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "api.middlewares.RequestLoggingMiddleware",
 ]
 
 DATABASES = {
