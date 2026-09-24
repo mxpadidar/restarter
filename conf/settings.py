@@ -1,10 +1,10 @@
-from pathlib import Path
+from .config import get_config
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+config = get_config()
 
-SECRET_KEY = "django-insecure-9t6y6^z8adq*dr$fx6169b&!wnw4@i-g6c^yw_azta59^geo47"
-
-DEBUG = True
+SECRET_KEY = config.django_secret
+DEBUG = config.debug
+ALLOWED_HOSTS = config.django_allowed_hosts
 
 TIME_ZONE = "UTC"
 
@@ -20,7 +20,6 @@ ROOT_URLCONF = "conf.urls"
 
 WSGI_APPLICATION = "conf.wsgi.application"
 
-ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -47,7 +46,7 @@ MIDDLEWARE = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": config.base_dir / "db.sqlite3",
     }
 }
 
@@ -56,7 +55,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-SPECTACULAR_SETTINGS = {"TITLE": "app-name", "VERSION": "0.1.0"}
+SPECTACULAR_SETTINGS = {"TITLE": config.app_name, "VERSION": config.app_version}
 
 TEMPLATES = [
     {
