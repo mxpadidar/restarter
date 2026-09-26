@@ -1,3 +1,4 @@
+from django.contrib.auth import get_backends
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 
@@ -47,6 +48,35 @@ class User(AbstractBaseUser, BaseModel):
 
     class Meta(BaseModel.Meta):  # type: ignore[reportIncompatibleVariableOverride]
         db_table = "users"
+
+    def has_perm(self, perm, obj=None) -> bool:
+        """Check whether any configured auth backend grants a permission.
+
+        :param perm: Permission to check.
+        :param obj: Optional object for object-level authorization.
+        :return: ``True`` if any backend grants the permission.
+        """
+        return any(
+            backend.has_perm(self, perm, obj)
+            for backend in get_backends()
+            if hasattr(backend, "has_perm")
+        )
+
+    def has_perms(self, perm_list, obj=None) -> bool:
+        """Check whether every requested permission is granted.
+
+        :param perm_list: Permissions to check.
+        :param obj: Optional object for object-level authorization.
+        :return: ``True`` when every permission is granted.
+        """
+        return all(self.has_perm(perm, obj) for perm in perm_list)
+
+    def has_module_perms(self, app_label: str) -> bool:
+        return any(
+            backend.has_module_perms(self, app_label)  # type: ignore[reportGeneralTypeIssues]
+            for backend in get_backends()
+            if hasattr(backend, "has_module_perms")
+        )
 
     def __str__(self) -> str:
         """Return the user's username."""

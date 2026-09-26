@@ -5,6 +5,8 @@ config = get_config()
 
 AUTH_USER_MODEL = "iam.User"
 
+AUTHENTICATION_BACKENDS = ["iam.auth_backend.AuthBackend"]
+
 SECRET_KEY = config.django_secret
 DEBUG = config.debug
 ALLOWED_HOSTS = config.django_allowed_hosts
