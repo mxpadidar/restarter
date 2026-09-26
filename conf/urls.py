@@ -1,7 +1,8 @@
-from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+from iam.admin_site import admin_site
 
 
 def health_view(request):
@@ -9,7 +10,7 @@ def health_view(request):
 
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin/", admin_site.urls),
     path("health/", health_view, name="health"),
     # openapi / swagger
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
