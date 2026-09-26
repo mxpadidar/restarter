@@ -1,6 +1,7 @@
 import pytest
 from django.db import IntegrityError
 
+from conf.container import Container
 from core.rbac import Role
 from iam.models import User, UserRole
 from iam.service_layer.role_manager import RoleManager
@@ -9,15 +10,15 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def unassigned_user() -> User:
-    """Create a user without roles."""
-    return User.objects.create_user(username="unassigned-user", password="test-password")
+def role_manager(container: Container) -> RoleManager:
+    """Fixture to provide a RoleManager instance."""
+    return container.role_manager
 
 
 @pytest.fixture
-def role_manager() -> RoleManager:
-    """Provide the application service responsible for role assignments."""
-    return RoleManager()
+def unassigned_user() -> User:
+    """Create a user without roles."""
+    return User.objects.create_user(username="unassigned-user", password="test-password")
 
 
 def test_assign_adds_application_roles(unassigned_user: User, role_manager: RoleManager):
