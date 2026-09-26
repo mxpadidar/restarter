@@ -1,6 +1,6 @@
-.PHONY: all install run migrations migrate superuser ruff type-check test
+.PHONY: all install run migrations migrate superuser ruff type-check migrations-check test
 
-all: install ruff type-check test
+all: install ruff type-check migrations-check test
 	@echo "-> all checks passed!"
 
 install:
@@ -31,6 +31,10 @@ ruff:
 type-check:
 	@echo "-> type checking..."
 	@uv run pyright .
+
+migrations-check:
+	@echo "-> checking migrations..."
+	@uv run manage.py makemigrations --check --dry-run
 
 test:
 	@echo "-> running tests..."
