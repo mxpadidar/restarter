@@ -3,6 +3,8 @@ from .logging import setup_logging
 
 config = get_config()
 
+AUTH_USER_MODEL = "iam.User"
+
 SECRET_KEY = config.django_secret
 DEBUG = config.debug
 ALLOWED_HOSTS = config.django_allowed_hosts
