@@ -1,6 +1,7 @@
 from django.db import IntegrityError, transaction
 
 from core.rbac import Role
+from core.utils.dt import get_current_datetime
 from iam.models import User
 from iam.models.user_role import UserRole
 
@@ -39,7 +40,8 @@ class RoleManager:
         if user_role is None:
             raise ValueError(f"user does not have role '{role.value}'")
 
-        user_role.soft_delete()
+        user_role.deleted_at = get_current_datetime()
+        user_role.save(update_fields=["deleted_at"])
 
     def get_roles(self, user: User) -> set[Role]:
         """Return all active roles assigned to a user.
