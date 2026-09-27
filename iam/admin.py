@@ -1,10 +1,10 @@
-"""Admin configuration for custom user and role-assignment models."""
+"""Admin configuration for IAM models."""
 
 from django.contrib import admin
 
 from iam.admin_site import admin_site
 
-from .models import User, UserRole
+from .models import SessionGrant, User, UserRole
 
 
 @admin.register(User, site=admin_site)
@@ -37,4 +37,30 @@ class UserRoleAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None) -> bool:
         """Keep role assignment removal in the role service layer."""
+        return False
+
+
+@admin.register(SessionGrant, site=admin_site)
+class SessionGrantAdmin(admin.ModelAdmin):
+    """Display session grants without exposing or modifying their secrets."""
+
+    list_display = ("user", "session_id", "ip_address", "issued_at", "expires_at", "revoked_at")
+    search_fields = ("user__username", "session_id")
+    exclude = ("secret_hash",)
+    readonly_fields = (
+        "id",
+        "user",
+        "session_id",
+        "ip_address",
+        "issued_at",
+        "expires_at",
+        "revoked_at",
+    )
+
+    def has_add_permission(self, request) -> bool:
+        """Keep session grant creation in the session service layer."""
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Keep session grant revocation in the session service layer."""
         return False
