@@ -3,7 +3,7 @@ from functools import cache
 
 from core.rbac import Rbac
 from iam.rbac import ROLE_PERMS as IAM_RP
-from iam.service_layer import RoleManager
+from iam.services import RoleManager
 
 
 @dataclass(frozen=True)

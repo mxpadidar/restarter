@@ -1,5 +1,5 @@
 from conf.container import Container, get_container
-from iam.service_layer import RoleManager
+from iam.services import RoleManager
 
 
 def test_get_container_builds_application_services():
