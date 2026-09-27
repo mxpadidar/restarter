@@ -17,6 +17,7 @@ class Config(BaseSettings):
     django_secret: str = "change-me"
     django_allowed_hosts: list[str] = []
     log_level: str = "INFO"
+    hmac_secret: str = "change-me"
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
@@ -27,6 +28,11 @@ class Config(BaseSettings):
     def debug(self) -> bool:
         """Return True if the application is running in development mode."""
         return self.environment == "dev"
+
+    @property
+    def hmac_key(self) -> bytes:
+        """Return the configured HMAC secret as bytes."""
+        return self.hmac_secret.encode("utf-8")
 
 
 @cache
