@@ -54,6 +54,11 @@ class User(AbstractBaseUser):
         default_permissions = ()
         ordering = ("-created_at", "-id")
 
+    @property
+    def is_active(self) -> bool:  # type: ignore[reportIncompatibleVariableOverride]
+        """Return whether the user is neither deleted nor deactivated."""
+        return self.deleted_at is None and self.deactivated_at is None
+
     def has_perm(self, perm, obj=None) -> bool:
         """Check whether any configured auth backend grants a permission.
 

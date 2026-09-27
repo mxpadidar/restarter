@@ -27,7 +27,7 @@ class AuthBackend(BaseBackend):
             User().set_password(password)
             return None
 
-        if user.deleted_at is not None or user.deactivated_at is not None:
+        if not user.is_active:
             return None
 
         if not user.check_password(password):
@@ -49,7 +49,7 @@ class AuthBackend(BaseBackend):
         if not isinstance(user_obj, User):
             return set()
 
-        if user_obj.deleted_at is not None or user_obj.deactivated_at is not None:
+        if not user_obj.is_active:
             return set()
 
         if obj is not None:
@@ -66,7 +66,7 @@ class AuthBackend(BaseBackend):
         if not isinstance(user_obj, User):
             return False
 
-        if user_obj.deleted_at is not None or user_obj.deactivated_at is not None:
+        if not user_obj.is_active:
             return False
 
         if user_obj.is_superuser:
@@ -84,7 +84,7 @@ class AuthBackend(BaseBackend):
         if not isinstance(user_obj, User):
             return False
 
-        if user_obj.deleted_at is not None or user_obj.deactivated_at is not None:
+        if not user_obj.is_active:
             return False
 
         if user_obj.is_superuser:

@@ -23,11 +23,7 @@ def handle_login_command(
         User().set_password(cmd.password)
         raise AuthenticationError(_("invalid username or password"))
 
-    if (
-        user.deleted_at is not None
-        or user.deactivated_at is not None
-        or not user.check_password(cmd.password)
-    ):
+    if not user.is_active or not user.check_password(cmd.password):
         raise AuthenticationError(_("invalid username or password"))
 
     issued_at = get_current_datetime()

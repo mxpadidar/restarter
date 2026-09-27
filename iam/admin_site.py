@@ -34,8 +34,7 @@ class SuperuserAdminSite(AdminSite):
             isinstance(user, UserModel)
             and user.is_authenticated
             and user.is_superuser
-            and user.deleted_at is None
-            and user.deactivated_at is None
+            and user.is_active
         )
 
 
