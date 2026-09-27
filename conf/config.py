@@ -1,3 +1,4 @@
+from datetime import timedelta
 from functools import cache
 from pathlib import Path
 from typing import Literal
@@ -18,6 +19,10 @@ class Config(BaseSettings):
     django_allowed_hosts: list[str] = []
     log_level: str = "INFO"
     hmac_secret: str = "change-me"
+    jwt_secret: str = "insecure-development-jwt-secret-replace-me"
+    jwt_issuer: str = "drf-starter"
+    jwt_audience: str = "drf-starter-api"
+    jwt_leeway_seconds: int = 30
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
@@ -33,6 +38,11 @@ class Config(BaseSettings):
     def hmac_key(self) -> bytes:
         """Return the configured HMAC secret as bytes."""
         return self.hmac_secret.encode("utf-8")
+
+    @property
+    def jwt_leeway(self) -> timedelta:
+        """Return the JWT validation leeway as a duration."""
+        return timedelta(seconds=self.jwt_leeway_seconds)
 
 
 @cache

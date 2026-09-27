@@ -10,6 +10,7 @@ dependencies = [
   "drf-spectacular>=0.30.0",
   "loguru>=0.7.3",
   "pydantic-settings>=2.15.0",
+  "pyjwt>=2.15.0",
 ]
 
 [dependency-groups]
