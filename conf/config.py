@@ -23,6 +23,9 @@ class Config(BaseSettings):
     jwt_issuer: str = "drf-starter"
     jwt_audience: str = "drf-starter-api"
     jwt_leeway_seconds: int = 30
+    access_token_ttl_seconds: int = 15 * 60
+    refresh_token_ttl_seconds: int = 30 * 24 * 60 * 60
+    refresh_token_size: int = 32
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
@@ -43,6 +46,16 @@ class Config(BaseSettings):
     def jwt_leeway(self) -> timedelta:
         """Return the JWT validation leeway as a duration."""
         return timedelta(seconds=self.jwt_leeway_seconds)
+
+    @property
+    def access_token_ttl(self) -> timedelta:
+        """Return the access-token lifetime as a duration."""
+        return timedelta(seconds=self.access_token_ttl_seconds)
+
+    @property
+    def refresh_token_ttl(self) -> timedelta:
+        """Return the refresh-token lifetime as a duration."""
+        return timedelta(seconds=self.refresh_token_ttl_seconds)
 
 
 @cache
