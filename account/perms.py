@@ -1,7 +1,7 @@
 from core.rbac import Perm, Role
 
 
-class UserPerm(Perm, resource="user", namespace="iam"):
+class UserPerm(Perm, resource="user", namespace="account"):
     ALL = "*"
     CREATE = "create"
     CREATE_SUPERUSER = "create_superuser"
@@ -10,14 +10,14 @@ class UserPerm(Perm, resource="user", namespace="iam"):
     VIEW = "view"
 
 
-class UserRolePerm(Perm, resource="user_role", namespace="iam"):
+class UserRolePerm(Perm, resource="user_role", namespace="account"):
     ALL = "*"
     ASSIGN = "assign"
     REMOVE = "remove"
     VIEW = "view"
 
 
-IAM_PERMS: dict[Role, set[str]] = {
+ACCOUNT_PERMS: dict[Role, set[str]] = {
     Role.ADMIN: {UserPerm.ALL.code, UserRolePerm.ALL.code},
     Role.NORMAL: set(),
 }

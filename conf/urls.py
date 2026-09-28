@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from iam.admin_site import admin_site
+from account.admin_site import admin_site
 
 
 def health_view(request):

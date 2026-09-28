@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from functools import cache
 
+from account.perms import ACCOUNT_PERMS
+from account.services import JWTService, RoleManager
 from conf.config import get_config
 from core.rbac import Rbac
 from core.services import HMACSHA256Hasher
-from iam.perms import IAM_PERMS
-from iam.services import JWTService, RoleManager
 
 
 @dataclass(frozen=True)
@@ -24,7 +24,7 @@ def get_container() -> Container:
     config = get_config()
 
     return Container(
-        rbac=Rbac([IAM_PERMS]),
+        rbac=Rbac([ACCOUNT_PERMS]),
         role_manager=RoleManager(),
         hmac_hasher=HMACSHA256Hasher(key=config.hmac_key),
         jwt_service=JWTService(

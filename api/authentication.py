@@ -3,10 +3,10 @@ from uuid import UUID
 from django.utils.translation import gettext as _
 from rest_framework import authentication, exceptions
 
+from account.dtos import AuthUser
+from account.services.jwt_service import JwtPayload
 from conf.container import get_container
 from core.rbac import Role
-from iam.dtos import AuthUser
-from iam.services.jwt_service import JwtPayload
 
 
 class JWTAuthentication(authentication.TokenAuthentication):

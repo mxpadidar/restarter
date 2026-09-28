@@ -1,9 +1,9 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import request, response, status, views
 
+from account import commands, handlers
 from api import serializers
 from conf.container import get_container
-from iam import commands, handlers
 
 
 class LogoutView(views.APIView):
@@ -12,7 +12,7 @@ class LogoutView(views.APIView):
     @extend_schema(
         request=serializers.RefreshTokenRequestSerializer,
         responses={status.HTTP_204_NO_CONTENT: None},
-        tags=["iam"],
+        tags=["account"],
     )
     def post(self, request: request.Request) -> response.Response:
         srz = serializers.RefreshTokenRequestSerializer(data=request.data)

@@ -1,8 +1,8 @@
-"""Admin configuration for IAM models."""
+"""Admin configuration for ACCOUNT models."""
 
 from django.contrib import admin
 
-from iam.admin_site import admin_site
+from account.admin_site import admin_site
 
 from .models import SessionGrant, User, UserRole
 

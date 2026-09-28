@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from iam.dtos import TokenPair
+from account.dtos import TokenPair
 
 
 def test_token_pair_creates_and_parses_a_refresh_token():

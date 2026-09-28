@@ -1,10 +1,10 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import request, response, status, views
 
+from account import commands, handlers
 from api import serializers
 from conf.config import get_config
 from conf.container import get_container
-from iam import commands, handlers
 
 
 class LoginView(views.APIView):
@@ -13,7 +13,7 @@ class LoginView(views.APIView):
     @extend_schema(
         request=serializers.LoginRequestSerializer,
         responses={status.HTTP_200_OK: serializers.TokenPairResponseSerializer},
-        tags=["iam"],
+        tags=["account"],
     )
     def post(self, request: request.Request) -> response.Response:
         srz = serializers.LoginRequestSerializer(data=request.data)

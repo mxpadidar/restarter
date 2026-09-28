@@ -3,9 +3,9 @@ from .logging import setup_logging
 
 config = get_config()
 
-AUTH_USER_MODEL = "iam.User"
+AUTH_USER_MODEL = "account.User"
 
-AUTHENTICATION_BACKENDS = ["iam.auth_backend.AuthBackend"]
+AUTHENTICATION_BACKENDS = ["account.auth_backend.AuthBackend"]
 
 SECRET_KEY = config.django_secret
 DEBUG = config.debug
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     # -------- local --------
-    "iam",
+    "account",
 ]
 
 MIDDLEWARE = [

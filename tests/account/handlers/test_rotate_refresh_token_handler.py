@@ -4,15 +4,15 @@ from uuid import uuid4
 import pytest
 from django.utils import timezone
 
+from account.commands import RotateRefreshTokenCommand
+from account.dtos import TokenPair
+from account.handlers import handle_rotate_refresh_token_command
+from account.models import SessionGrant, User
 from conf.config import Config
 from conf.container import Container
 from core.errors import AuthenticationError
 from core.rbac import Role
 from core.utils import datetime_to_timestamp
-from iam.commands import RotateRefreshTokenCommand
-from iam.dtos import TokenPair
-from iam.handlers import handle_rotate_refresh_token_command
-from iam.models import SessionGrant, User
 
 pytestmark = pytest.mark.django_db
 

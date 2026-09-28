@@ -1,7 +1,7 @@
 import pytest
 from django.utils import timezone
 
-from iam.models import User
+from account.models import User
 
 pytestmark = pytest.mark.django_db
 

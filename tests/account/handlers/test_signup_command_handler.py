@@ -1,11 +1,11 @@
 import pytest
 
+from account.commands import SignupCommand
+from account.handlers import handle_signup_command
+from account.models import User
 from conf.container import Container
 from core.errors import ConflictError
 from core.rbac import Role
-from iam.commands import SignupCommand
-from iam.handlers import handle_signup_command
-from iam.models import User
 
 pytestmark = pytest.mark.django_db
 

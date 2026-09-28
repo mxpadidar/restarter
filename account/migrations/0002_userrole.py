@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("iam", "0001_initial"),
+        ("account", "0001_initial"),
     ]
 
     operations = [

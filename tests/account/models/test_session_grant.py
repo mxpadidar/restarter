@@ -8,7 +8,7 @@ from django.db import IntegrityError, transaction
 from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
-from iam.models import SessionGrant, User
+from account.models import SessionGrant, User
 
 pytestmark = pytest.mark.django_db
 

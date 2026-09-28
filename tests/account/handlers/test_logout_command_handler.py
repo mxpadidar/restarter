@@ -3,12 +3,12 @@ from uuid import uuid4
 import pytest
 from django.utils import timezone
 
+from account.commands import LogoutCommand
+from account.handlers import handle_logout_command
+from account.models import SessionGrant, User
 from conf.config import Config
 from conf.container import Container
 from core.errors import AuthenticationError
-from iam.commands import LogoutCommand
-from iam.handlers import handle_logout_command
-from iam.models import SessionGrant, User
 
 pytestmark = pytest.mark.django_db
 

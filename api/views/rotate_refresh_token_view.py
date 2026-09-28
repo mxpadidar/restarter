@@ -1,10 +1,10 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import request, response, status, views
 
+from account import commands, handlers
 from api import serializers
 from conf.config import get_config
 from conf.container import get_container
-from iam import commands, handlers
 
 
 class RotateRefreshTokenView(views.APIView):
@@ -13,7 +13,7 @@ class RotateRefreshTokenView(views.APIView):
     @extend_schema(
         request=serializers.RefreshTokenRequestSerializer,
         responses={status.HTTP_200_OK: serializers.TokenPairResponseSerializer},
-        tags=["iam"],
+        tags=["account"],
     )
     def post(self, request: request.Request) -> response.Response:
         srz = serializers.RefreshTokenRequestSerializer(data=request.data)

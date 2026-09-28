@@ -1,9 +1,9 @@
 from django.db import IntegrityError, transaction
 
+from account.models import User
+from account.models.user_role import UserRole
 from core.rbac import Role
 from core.utils.dt import get_current_datetime
-from iam.models import User
-from iam.models.user_role import UserRole
 
 
 class RoleManager:

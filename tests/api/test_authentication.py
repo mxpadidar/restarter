@@ -7,14 +7,14 @@ from rest_framework import exceptions
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
+from account.dtos import AuthUser
+from account.models import User
+from account.services.jwt_service import JwtPayload
 from api.authentication import JWTAuthentication
 from conf.config import Config
 from conf.container import Container
 from core.rbac import Role
 from core.utils import datetime_to_timestamp
-from iam.dtos import AuthUser
-from iam.models import User
-from iam.services.jwt_service import JwtPayload
 
 pytestmark = pytest.mark.django_db
 

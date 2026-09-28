@@ -4,10 +4,10 @@ from uuid import uuid4
 import jwt
 import pytest
 
+from account.services.jwt_service import JwtPayload, JWTService
 from conf.config import Config
 from conf.container import Container
 from core.rbac import Role
-from iam.services.jwt_service import JwtPayload, JWTService
 
 
 @pytest.fixture

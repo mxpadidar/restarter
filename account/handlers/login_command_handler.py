@@ -3,13 +3,13 @@ import uuid
 from django.db import transaction
 from django.utils.translation import gettext as _
 
+from account.commands import LoginCommand
+from account.dtos import TokenPair
+from account.models import SessionGrant, User
+from account.services import JWTService, RoleManager
 from core.errors import AuthenticationError
 from core.services import HMACSHA256Hasher
 from core.utils import datetime_to_timestamp, generate_urlsafe_token, get_current_datetime
-from iam.commands import LoginCommand
-from iam.dtos import TokenPair
-from iam.models import SessionGrant, User
-from iam.services import JWTService, RoleManager
 
 
 @transaction.atomic

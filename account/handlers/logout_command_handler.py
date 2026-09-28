@@ -1,12 +1,12 @@
 from django.db import transaction
 from django.utils.translation import gettext as _
 
+from account.commands import LogoutCommand
+from account.dtos import TokenPair
+from account.models import SessionGrant
 from core.errors import AuthenticationError
 from core.services import HMACSHA256Hasher
 from core.utils import get_current_datetime
-from iam.commands import LogoutCommand
-from iam.dtos import TokenPair
-from iam.models import SessionGrant
 
 
 @transaction.atomic

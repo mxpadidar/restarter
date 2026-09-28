@@ -2,8 +2,8 @@ from uuid import UUID
 
 from django.contrib.auth.backends import BaseBackend
 
+from account.models import User
 from conf.container import get_container
-from iam.models import User
 
 container = get_container()
 

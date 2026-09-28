@@ -1,10 +1,10 @@
 import pytest
 from django.db import IntegrityError
 
+from account.models import User, UserRole
+from account.services.role_manager import RoleManager
 from conf.container import Container
 from core.rbac import Role
-from iam.models import User, UserRole
-from iam.services.role_manager import RoleManager
 
 pytestmark = pytest.mark.django_db
 
