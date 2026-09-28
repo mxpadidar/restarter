@@ -2,7 +2,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import request, response, status, views
 
 from account import commands, handlers
-from api import serializers
+from api.account import serializers
 from conf.container import get_container
 
 

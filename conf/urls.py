@@ -10,7 +10,7 @@ def health_view(request):
 
 
 urlpatterns = [
-    path("api/", include("api.urls")),
+    path("api/accounts/", include("api.account.urls")),
     path("admin/", admin_site.urls),
     path("health/", health_view, name="health"),
     # openapi / swagger

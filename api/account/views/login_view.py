@@ -2,33 +2,36 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import request, response, status, views
 
 from account import commands, handlers
-from api import serializers
+from api.account import serializers
 from conf.config import get_config
 from conf.container import get_container
 
 
-class RotateRefreshTokenView(views.APIView):
-    """Rotate a refresh token and issue a new token pair."""
+class LoginView(views.APIView):
+    """Authenticate a user and issue access and refresh tokens."""
 
     @extend_schema(
-        request=serializers.RefreshTokenRequestSerializer,
+        request=serializers.LoginRequestSerializer,
         responses={status.HTTP_200_OK: serializers.TokenPairResponseSerializer},
         tags=["account"],
     )
     def post(self, request: request.Request) -> response.Response:
-        srz = serializers.RefreshTokenRequestSerializer(data=request.data)
+        srz = serializers.LoginRequestSerializer(data=request.data)
         srz.is_valid(raise_exception=True)
 
-        config = get_config()
         container = get_container()
-        cmd = commands.RotateRefreshTokenCommand(
+
+        config = get_config()
+
+        cmd = commands.LoginCommand(
             **srz.validated_data,
             access_token_ttl=config.access_token_ttl,
             refresh_token_ttl=config.refresh_token_ttl,
             refresh_token_size=config.refresh_token_size,
             ip_address=request.META.get("REMOTE_ADDR"),
         )
-        result = handlers.handle_rotate_refresh_token_command(
+
+        result = handlers.handle_login_command(
             cmd=cmd,
             hasher=container.hmac_hasher,
             jwt_service=container.jwt_service,

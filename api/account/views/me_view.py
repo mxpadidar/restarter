@@ -6,7 +6,7 @@ from rest_framework import exceptions, permissions, request, response, status, v
 
 from account.dtos import AuthUser
 from account.models import SessionGrant
-from api import serializers
+from api.account import serializers
 from core.utils import get_current_datetime
 
 
