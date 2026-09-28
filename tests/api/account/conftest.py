@@ -23,5 +23,5 @@ def me_url() -> str:
 
 
 @pytest.fixture
-def rotate_refresh_token_url() -> str:
-    return reverse("rotate-refresh-token")
+def token_rotate_url() -> str:
+    return reverse("token-rotate")

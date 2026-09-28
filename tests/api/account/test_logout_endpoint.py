@@ -9,7 +9,7 @@ pytestmark = pytest.mark.django_db
 def test_logout_revokes_the_refresh_token(
     client: Client,
     logout_url: str,
-    rotate_refresh_token_url: str,
+    token_rotate_url: str,
     auth_tokens: dict[str, str],
 ):
     refresh_token = auth_tokens["refresh_token"]
@@ -23,7 +23,7 @@ def test_logout_revokes_the_refresh_token(
     assert resp.content == b""
 
     resp = client.post(
-        rotate_refresh_token_url,
+        token_rotate_url,
         data={"refresh_token": refresh_token},
         content_type="application/json",
     )

@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils.translation import gettext as _
 
-from account.commands import RotateRefreshTokenCommand
+from account.commands import TokenRotationCommand
 from account.dtos import TokenPair
 from account.models import SessionGrant
 from account.services import JWTService, RoleManager
@@ -11,8 +11,8 @@ from core.utils import datetime_to_timestamp, generate_urlsafe_token, get_curren
 
 
 @transaction.atomic
-def handle_rotate_refresh_token_command(
-    cmd: RotateRefreshTokenCommand,
+def handle_token_rotation_comand(
+    cmd: TokenRotationCommand,
     hasher: HMACSHA256Hasher,
     jwt_service: JWTService,
     role_manager: RoleManager,

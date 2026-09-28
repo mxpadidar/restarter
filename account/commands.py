@@ -24,7 +24,7 @@ class LogoutCommand:
 
 
 @dataclasses.dataclass(frozen=True)
-class RotateRefreshTokenCommand:
+class TokenRotationCommand:
     refresh_token: str
     access_token_ttl: timedelta
     refresh_token_ttl: timedelta

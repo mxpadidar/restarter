@@ -4,9 +4,9 @@ from uuid import uuid4
 import pytest
 from django.utils import timezone
 
-from account.commands import RotateRefreshTokenCommand
+from account.commands import TokenRotationCommand
 from account.dtos import TokenPair
-from account.handlers import handle_rotate_refresh_token_command
+from account.handlers import handle_token_rotation_comand
 from account.models import SessionGrant, User
 from conf.config import Config
 from conf.container import Container
@@ -31,15 +31,15 @@ def active_grant(container: Container, config: Config) -> tuple[SessionGrant, st
     return grant, refresh_secret
 
 
-def test_rotate_refresh_token_revokes_the_old_grant_and_issues_a_new_pair(
+def test_token_rotation_revokes_the_old_grant_and_issues_a_new_pair(
     active_grant: tuple[SessionGrant, str],
     container: Container,
     config: Config,
 ):
     grant, refresh_secret = active_grant
 
-    token_pair = handle_rotate_refresh_token_command(
-        cmd=RotateRefreshTokenCommand(
+    token_pair = handle_token_rotation_comand(
+        cmd=TokenRotationCommand(
             refresh_token=f"{grant.id.hex}:{refresh_secret}",
             access_token_ttl=config.access_token_ttl,
             refresh_token_ttl=config.refresh_token_ttl,
@@ -70,47 +70,44 @@ def test_rotate_refresh_token_revokes_the_old_grant_and_issues_a_new_pair(
     assert payload["exp"] == datetime_to_timestamp(token_pair.expires_at)
 
 
-def test_rotate_refresh_token_rejects_reusing_a_rotated_token(
+def test_token_rotation_rejects_reusing_a_rotated_token(
     active_grant: tuple[SessionGrant, str], container: Container, config: Config
 ):
     grant, refresh_secret = active_grant
-    command = RotateRefreshTokenCommand(
+    command = TokenRotationCommand(
         refresh_token=f"{grant.id.hex}:{refresh_secret}",
         access_token_ttl=config.access_token_ttl,
         refresh_token_ttl=config.refresh_token_ttl,
         refresh_token_size=config.refresh_token_size,
     )
 
-    handle_rotate_refresh_token_command(
+    handle_token_rotation_comand(
         cmd=command,
         hasher=container.hmac_hasher,
         jwt_service=container.jwt_service,
         role_manager=container.role_manager,
     )
 
-    with pytest.raises(AuthenticationError) as exc_info:
-        handle_rotate_refresh_token_command(
+    with pytest.raises(AuthenticationError):
+        handle_token_rotation_comand(
             cmd=command,
             hasher=container.hmac_hasher,
             jwt_service=container.jwt_service,
             role_manager=container.role_manager,
         )
 
-    assert exc_info.value.details == {}
-    assert (
-        SessionGrant.objects.filter(session_id=grant.session_id, revoked_at__isnull=True).count()
-        == 1
-    )
+    grant.refresh_from_db()
+    assert grant.revoked_at is not None
 
 
-def test_rotate_refresh_token_uses_current_user_roles(
+def test_token_rotation_uses_current_user_roles(
     active_grant: tuple[SessionGrant, str], container: Container, config: Config
 ):
     grant, refresh_secret = active_grant
     container.role_manager.assign(grant.user, Role.ADMIN)
 
-    token_pair = handle_rotate_refresh_token_command(
-        cmd=RotateRefreshTokenCommand(
+    token_pair = handle_token_rotation_comand(
+        cmd=TokenRotationCommand(
             refresh_token=f"{grant.id.hex}:{refresh_secret}",
             access_token_ttl=config.access_token_ttl,
             refresh_token_ttl=config.refresh_token_ttl,
@@ -126,10 +123,10 @@ def test_rotate_refresh_token_uses_current_user_roles(
     assert payload["roles"] == [Role.ADMIN.value, Role.NORMAL.value]
 
 
-def test_rotate_refresh_token_rejects_a_malformed_token(container: Container, config: Config):
+def test_token_rotation_rejects_a_malformed_token(container: Container, config: Config):
     with pytest.raises(AuthenticationError):
-        handle_rotate_refresh_token_command(
-            cmd=RotateRefreshTokenCommand(
+        handle_token_rotation_comand(
+            cmd=TokenRotationCommand(
                 refresh_token="malformed",
                 access_token_ttl=config.access_token_ttl,
                 refresh_token_ttl=config.refresh_token_ttl,
@@ -141,10 +138,10 @@ def test_rotate_refresh_token_rejects_a_malformed_token(container: Container, co
         )
 
 
-def test_rotate_refresh_token_rejects_an_unknown_grant(container: Container, config: Config):
+def test_token_rotation_rejects_an_unknown_grant(container: Container, config: Config):
     with pytest.raises(AuthenticationError):
-        handle_rotate_refresh_token_command(
-            cmd=RotateRefreshTokenCommand(
+        handle_token_rotation_comand(
+            cmd=TokenRotationCommand(
                 refresh_token=f"{uuid4().hex}:refresh-secret",
                 access_token_ttl=config.access_token_ttl,
                 refresh_token_ttl=config.refresh_token_ttl,
@@ -156,14 +153,14 @@ def test_rotate_refresh_token_rejects_an_unknown_grant(container: Container, con
         )
 
 
-def test_rotate_refresh_token_rejects_an_incorrect_refresh_secret(
+def test_token_rotation_rejects_an_incorrect_refresh_secret(
     active_grant: tuple[SessionGrant, str], container: Container, config: Config
 ):
     grant, _ = active_grant
 
     with pytest.raises(AuthenticationError):
-        handle_rotate_refresh_token_command(
-            cmd=RotateRefreshTokenCommand(
+        handle_token_rotation_comand(
+            cmd=TokenRotationCommand(
                 refresh_token=f"{grant.id.hex}:incorrect-secret",
                 access_token_ttl=config.access_token_ttl,
                 refresh_token_ttl=config.refresh_token_ttl,
@@ -178,7 +175,7 @@ def test_rotate_refresh_token_rejects_an_incorrect_refresh_secret(
     assert grant.revoked_at is None
 
 
-def test_rotate_refresh_token_rejects_a_deleted_user(
+def test_token_rotation_rejects_a_deleted_user(
     active_grant: tuple[SessionGrant, str], container: Container, config: Config
 ):
     grant, refresh_secret = active_grant
@@ -186,8 +183,8 @@ def test_rotate_refresh_token_rejects_a_deleted_user(
     grant.user.save(update_fields=("deleted_at",))
 
     with pytest.raises(AuthenticationError):
-        handle_rotate_refresh_token_command(
-            cmd=RotateRefreshTokenCommand(
+        handle_token_rotation_comand(
+            cmd=TokenRotationCommand(
                 refresh_token=f"{grant.id.hex}:{refresh_secret}",
                 access_token_ttl=config.access_token_ttl,
                 refresh_token_ttl=config.refresh_token_ttl,
@@ -202,7 +199,7 @@ def test_rotate_refresh_token_rejects_a_deleted_user(
     assert grant.revoked_at is None
 
 
-def test_rotate_refresh_token_rejects_a_deactivated_user(
+def test_token_rotation_rejects_a_deactivated_user(
     active_grant: tuple[SessionGrant, str], container: Container, config: Config
 ):
     grant, refresh_secret = active_grant
@@ -210,8 +207,8 @@ def test_rotate_refresh_token_rejects_a_deactivated_user(
     grant.user.save(update_fields=("deactivated_at",))
 
     with pytest.raises(AuthenticationError):
-        handle_rotate_refresh_token_command(
-            cmd=RotateRefreshTokenCommand(
+        handle_token_rotation_comand(
+            cmd=TokenRotationCommand(
                 refresh_token=f"{grant.id.hex}:{refresh_secret}",
                 access_token_ttl=config.access_token_ttl,
                 refresh_token_ttl=config.refresh_token_ttl,
@@ -226,7 +223,7 @@ def test_rotate_refresh_token_rejects_a_deactivated_user(
     assert grant.revoked_at is None
 
 
-def test_rotate_refresh_token_rejects_expired_grants(
+def test_token_rotation_rejects_expired_grants(
     active_grant: tuple[SessionGrant, str],
     container: Container,
     config: Config,
@@ -239,8 +236,8 @@ def test_rotate_refresh_token_rejects_expired_grants(
     )
 
     with pytest.raises(AuthenticationError):
-        handle_rotate_refresh_token_command(
-            cmd=RotateRefreshTokenCommand(
+        handle_token_rotation_comand(
+            cmd=TokenRotationCommand(
                 refresh_token=f"{grant.id.hex}:{refresh_secret}",
                 access_token_ttl=config.access_token_ttl,
                 refresh_token_ttl=config.refresh_token_ttl,

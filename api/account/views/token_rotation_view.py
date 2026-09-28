@@ -7,7 +7,7 @@ from conf.config import get_config
 from conf.container import get_container
 
 
-class RotateRefreshTokenView(views.APIView):
+class TokenRotationView(views.APIView):
     """Rotate a refresh token and issue a new token pair."""
 
     @extend_schema(
@@ -21,14 +21,14 @@ class RotateRefreshTokenView(views.APIView):
 
         config = get_config()
         container = get_container()
-        cmd = commands.RotateRefreshTokenCommand(
+        cmd = commands.TokenRotationCommand(
             **srz.validated_data,
             access_token_ttl=config.access_token_ttl,
             refresh_token_ttl=config.refresh_token_ttl,
             refresh_token_size=config.refresh_token_size,
             ip_address=request.META.get("REMOTE_ADDR"),
         )
-        result = handlers.handle_rotate_refresh_token_command(
+        result = handlers.handle_token_rotation_comand(
             cmd=cmd,
             hasher=container.hmac_hasher,
             jwt_service=container.jwt_service,

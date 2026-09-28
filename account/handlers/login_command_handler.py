@@ -14,10 +14,7 @@ from core.utils import datetime_to_timestamp, generate_urlsafe_token, get_curren
 
 @transaction.atomic
 def handle_login_command(
-    cmd: LoginCommand,
-    hasher: HMACSHA256Hasher,
-    jwt_service: JWTService,
-    role_manager: RoleManager,
+    cmd: LoginCommand, hasher: HMACSHA256Hasher, jwt_service: JWTService, role_manager: RoleManager
 ) -> TokenPair:
     """Authenticate a user and create an access/refresh token pair."""
     username = cmd.username.strip().lower()
