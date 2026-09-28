@@ -1,5 +1,5 @@
-from core.rbac import Namespace, Rbac, Role
-from iam.rbac import UserPerm, UserRolePerm
+from core.rbac import Rbac, Role
+from iam.perms import UserPerm, UserRolePerm
 
 
 def test_resource_wildcard_grants_only_its_resource_permissions():
@@ -7,11 +7,6 @@ def test_resource_wildcard_grants_only_its_resource_permissions():
 
     assert rbac.has_perm([Role.ADMIN], UserPerm.CREATE.code)
     assert not rbac.has_perm([Role.ADMIN], UserRolePerm.ASSIGN.code)
-
-
-def test_rbac_enums_use_lower_case_string_values():
-    assert Role.ADMIN.value == "admin"
-    assert Namespace.IAM.value == "iam"
 
 
 def test_iam_permissions_use_meaningful_action_codes():
@@ -27,4 +22,4 @@ def test_iam_permissions_use_meaningful_action_codes():
 def test_namespace_permission_check_uses_the_permission_code_prefix():
     rbac = Rbac([{Role.ADMIN: {UserPerm.ALL.code}}])
 
-    assert rbac.has_namespace_perms([Role.ADMIN], Namespace.IAM)
+    assert rbac.has_namespace_perms([Role.ADMIN], "iam")

@@ -3,7 +3,6 @@ from uuid import UUID
 from django.contrib.auth.backends import BaseBackend
 
 from conf.container import get_container
-from core.rbac import Namespace
 from iam.models import User
 
 container = get_container()
@@ -90,11 +89,6 @@ class AuthBackend(BaseBackend):
         if user_obj.is_superuser:
             return True
 
-        try:
-            namespace = Namespace(app_label)
-        except ValueError:
-            return False
-
         user_roles = container.role_manager.get_roles(user_obj)
 
-        return container.rbac.has_namespace_perms(user_roles, namespace)
+        return container.rbac.has_namespace_perms(user_roles, app_label)

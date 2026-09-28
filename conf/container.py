@@ -4,7 +4,7 @@ from functools import cache
 from conf.config import get_config
 from core.rbac import Rbac
 from core.services import HMACSHA256Hasher
-from iam.rbac import ROLE_PERMS as IAM_RP
+from iam.perms import IAM_PERMS
 from iam.services import JWTService, RoleManager
 
 
@@ -24,7 +24,7 @@ def get_container() -> Container:
     config = get_config()
 
     return Container(
-        rbac=Rbac([IAM_RP]),
+        rbac=Rbac([IAM_PERMS]),
         role_manager=RoleManager(),
         hmac_hasher=HMACSHA256Hasher(key=config.hmac_key),
         jwt_service=JWTService(

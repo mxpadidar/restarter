@@ -1,6 +1,6 @@
 from collections import defaultdict
 from collections.abc import Iterable
-from enum import Enum, nonmember
+from enum import Enum
 from fnmatch import fnmatchcase
 
 
@@ -11,62 +11,27 @@ class Role(Enum):
     NORMAL = "normal"  # non-admin users
 
 
-class Namespace(Enum):
-    """Top-level namespace shared by related RBAC resources and permissions."""
-
-    IAM = "iam"
-
-
-class Resource(Enum):
-    """Base class for application resources protected by permissions."""
-
-    # Set on each Resource subclass through the required ``namespace`` keyword.
-    _namespace = nonmember(None)
-
-    def __init_subclass__(cls, *, namespace: Namespace, **kwargs) -> None:
-        """Bind a resource enum to the namespace that owns it.
-
-        :param namespace: Top-level namespace that owns the resource.
-        """
-        super().__init_subclass__(**kwargs)
-        cls._namespace = namespace
-
-    @property
-    def namespace(self) -> Namespace:
-        """Return the top-level namespace that owns this resource."""
-        assert isinstance(self._namespace, Namespace)
-        return self._namespace
-
-
 class Perm(Enum):
     """Base class for permissions associated with protected resources."""
 
-    # Set on each permission enum through the required ``resource`` keyword.
-    _resource = nonmember(None)
-
-    def __init_subclass__(cls, *, resource: Resource, **kwargs) -> None:
+    def __init_subclass__(cls, *, resource=None, namespace=None) -> None:
         """Bind a permission enum to the resource it protects.
 
+        :param namespace: Top-level namespace for the permission.
         :param resource: Resource protected by the permissions in the enum.
         """
-        super().__init_subclass__(**kwargs)
-        cls._resource = resource
-
-    @property
-    def resource(self) -> Resource:
-        """Return the resource protected by this permission."""
-        assert isinstance(self._resource, Resource)
-        return self._resource
-
-    @property
-    def namespace(self) -> Namespace:
-        """Return the top-level namespace that owns this permission."""
-        return self.resource.namespace
+        if namespace is None:
+            raise ValueError("Permission namespace must be provided.")
+        if resource is None:
+            raise ValueError("Permission resource must be provided.")
+        super().__init_subclass__()
+        cls.__namespace = namespace
+        cls.__resource = resource
 
     @property
     def code(self) -> str:
         """Return the ``namespace:resource:action`` authorization code."""
-        return f"{self.namespace.value}:{self.resource.value}:{self.value}"
+        return f"{self.__namespace}:{self.__resource}:{self.value}"
 
 
 # Mapping from each role to the permissions granted to that role.
@@ -143,7 +108,7 @@ class Rbac:
             for granted_permission in self.get_roles_permissions(roles)
         )
 
-    def has_namespace_perms(self, roles: Iterable[Role], namespace: Namespace) -> bool:
+    def has_namespace_perms(self, roles: Iterable[Role], namespace: str) -> bool:
         """Check whether any provided role grants a permission in a namespace.
 
         :param roles: Roles to evaluate.
@@ -152,8 +117,6 @@ class Rbac:
             otherwise ``False``.
         """
         # Permission codes begin with ``<namespace>:`` as defined by ``Perm.code``.
-        namespace_prefix = f"{namespace.value}:"
         return any(
-            permission.startswith(namespace_prefix)
-            for permission in self.get_roles_permissions(roles)
+            permission.startswith(namespace) for permission in self.get_roles_permissions(roles)
         )
