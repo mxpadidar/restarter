@@ -11,12 +11,12 @@ class RotateRefreshTokenView(views.APIView):
     """Rotate a refresh token and issue a new token pair."""
 
     @extend_schema(
-        request=serializers.RotateRefreshTokenRequestSerializer,
+        request=serializers.RefreshTokenRequestSerializer,
         responses={status.HTTP_200_OK: serializers.TokenPairResponseSerializer},
         tags=["iam"],
     )
     def post(self, request: request.Request) -> response.Response:
-        srz = serializers.RotateRefreshTokenRequestSerializer(data=request.data)
+        srz = serializers.RefreshTokenRequestSerializer(data=request.data)
         srz.is_valid(raise_exception=True)
 
         config = get_config()
