@@ -19,6 +19,11 @@ class LoginCommand:
 
 
 @dataclasses.dataclass(frozen=True)
+class LogoutCommand:
+    refresh_token: str
+
+
+@dataclasses.dataclass(frozen=True)
 class RotateRefreshTokenCommand:
     refresh_token: str
     access_token_ttl: timedelta
