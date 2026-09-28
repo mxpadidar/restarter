@@ -1,6 +1,5 @@
 import pytest
 from django.test import Client
-from django.urls import reverse
 
 from account.models import SessionGrant, User
 from core.errors import ErrorCode
@@ -8,45 +7,18 @@ from core.errors import ErrorCode
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture
-def login_url() -> str:
-    return reverse("login")
-
-
-@pytest.fixture
-def me_url() -> str:
-    return reverse("me")
-
-
-@pytest.fixture
-def user_data(client: Client) -> dict[str, str]:
-    creds = {"username": "test-user", "password": "test-password"}
-    resp = client.post(reverse("signup"), data=creds, content_type="application/json")
-    assert resp.status_code == 201
-    resp_data = resp.json()
-    return {**creds, "id": resp_data["id"]}
-
-
-@pytest.fixture
-def access_token(client: Client, login_url: str, user_data: dict[str, str]) -> str:
-    resp = client.post(
-        login_url,
-        data={"username": user_data["username"], "password": user_data["password"]},
-        content_type="application/json",
-    )
-    assert resp.status_code == 200
-    resp_data = resp.json()
-    return resp_data["access_token"]
-
-
 def test_me_returns_the_authenticated_principal(
-    client: Client, me_url: str, user_data: dict[str, str], access_token: str
+    client: Client,
+    me_url: str,
+    auth_creds: dict[str, str],
+    auth_tokens: dict[str, str],
 ):
+    access_token = auth_tokens["access_token"]
     resp = client.get(me_url, HTTP_AUTHORIZATION=f"Bearer {access_token}")
 
     assert resp.status_code == 200
     resp_data = resp.json()
-    user = User.objects.get(id=user_data["id"])
+    user = User.objects.get(username=auth_creds["username"])
     grant = SessionGrant.objects.get(user=user, revoked_at__isnull=True)
     assert set(resp_data) == {"id", "username", "created_at", "last_login"}
     assert resp_data["id"] == str(user.id)
@@ -73,9 +45,14 @@ def test_me_rejects_an_invalid_access_token(client: Client, me_url: str):
 
 
 def test_me_rejects_a_revoked_session_grant(
-    client: Client, me_url: str, user_data: dict[str, str], access_token: str
+    client: Client,
+    me_url: str,
+    auth_creds: dict[str, str],
+    auth_tokens: dict[str, str],
 ):
-    grant = SessionGrant.objects.get(user_id=user_data["id"], revoked_at__isnull=True)
+    access_token = auth_tokens["access_token"]
+    user = User.objects.get(username=auth_creds["username"])
+    grant = SessionGrant.objects.get(user=user, revoked_at__isnull=True)
     grant.revoke()
 
     resp = client.get(me_url, HTTP_AUTHORIZATION=f"Bearer {access_token}")

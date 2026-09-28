@@ -2,16 +2,10 @@ from uuid import UUID
 
 import pytest
 from django.test import Client
-from django.urls import reverse
 
 from core.errors import ErrorCode
 
 pytestmark = pytest.mark.django_db
-
-
-@pytest.fixture
-def signup_url() -> str:
-    return reverse("signup")
 
 
 def test_signup_creates_a_user(client: Client, signup_url: str):

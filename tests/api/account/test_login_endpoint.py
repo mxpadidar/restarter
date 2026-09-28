@@ -1,30 +1,15 @@
 import pytest
 from django.test import Client
-from django.urls import reverse
 
 from core.errors import ErrorCode
 
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture
-def login_url() -> str:
-    return reverse("login")
-
-
-@pytest.fixture
-def user_creds(client: Client) -> dict:
-    signup_url = reverse("signup")
-    creds = {"username": "test-user", "password": "test-password"}
-    response = client.post(signup_url, data=creds, content_type="application/json")
-    assert response.status_code == 201
-    return creds
-
-
 def test_login_returns_an_access_and_refresh_token(
-    client: Client, user_creds: dict, login_url: str
+    client: Client, auth_creds: dict[str, str], login_url: str
 ):
-    resp = client.post(login_url, data=user_creds, content_type="application/json")
+    resp = client.post(login_url, data=auth_creds, content_type="application/json")
     assert resp.status_code == 200
 
     resp_data = resp.json()
@@ -43,10 +28,12 @@ def test_login_rejects_invalid_input(client: Client, login_url: str):
     assert resp_data["error"]["code"] == ErrorCode.VALIDATION_ERROR
 
 
-def test_login_rejects_invalid_credentials(client: Client, user_creds: dict, login_url: str):
+def test_login_rejects_invalid_credentials(
+    client: Client, auth_creds: dict[str, str], login_url: str
+):
     resp = client.post(
         login_url,
-        data={"username": user_creds["username"], "password": "wrong-password"},
+        data={"username": auth_creds["username"], "password": "wrong-password"},
         content_type="application/json",
     )
     assert resp.status_code == 401
