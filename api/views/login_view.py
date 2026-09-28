@@ -35,6 +35,7 @@ class LoginView(views.APIView):
             cmd=cmd,
             hasher=container.hmac_hasher,
             jwt_service=container.jwt_service,
+            role_manager=container.role_manager,
         )
 
         return response.Response(

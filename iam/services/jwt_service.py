@@ -3,10 +3,13 @@ from typing import TypedDict, Unpack
 
 import jwt
 
+from core.rbac import Role
+
 
 class JwtPayload(TypedDict):
     sub: str  # subject id
     jti: str  # token id
+    roles: list[str]
     iat: int  # issued at ts
     exp: int  # expiration ts
 
@@ -15,7 +18,7 @@ class JWTService:
     """Encode and validate access tokens using a fixed JWT algorithm."""
 
     ALG = "HS256"
-    CLAIMS = ("iss", "aud", "sub", "jti", "iat", "exp")
+    CLAIMS = ("iss", "aud", "sub", "jti", "roles", "iat", "exp")
 
     def __init__(
         self, *, secret: str, issuer: str, audience: str, leeway: datetime.timedelta
@@ -32,6 +35,13 @@ class JWTService:
         self._audience = audience
         self._leeway = leeway
 
+    @staticmethod
+    def _normalize_roles(roles: object) -> list[str]:
+        """Validate role claim values and return their canonical strings."""
+        if not isinstance(roles, list):
+            raise TypeError
+        return [Role(role).value for role in roles]
+
     def encode(self, **payload: Unpack[JwtPayload]) -> str:
         """Encode access-token claims into a signed JWT.
 
@@ -40,12 +50,14 @@ class JWTService:
         :raises ValueError: If the supplied claims cannot form a valid payload.
         """
         try:
+            roles = self._normalize_roles(payload["roles"])
+
             return jwt.encode(
-                {**payload, "iss": self._issuer, "aud": self._audience},
+                {**payload, "iss": self._issuer, "aud": self._audience, "roles": roles},
                 self._secret,
                 algorithm=self.ALG,
             )
-        except (jwt.PyJWTError, KeyError) as exc:
+        except (jwt.PyJWTError, KeyError, TypeError, ValueError) as exc:
             raise ValueError("could not encode access token") from exc
 
     def decode(self, token: str) -> JwtPayload:
@@ -71,12 +83,14 @@ class JWTService:
                 leeway=self._leeway,
                 options={"require": list(self.CLAIMS)},
             )
+            roles = self._normalize_roles(payload["roles"])
 
             return {
                 "sub": payload["sub"],
                 "jti": payload["jti"],
+                "roles": roles,
                 "iat": payload["iat"],
                 "exp": payload["exp"],
             }
-        except (jwt.PyJWTError, KeyError) as exc:
+        except (jwt.PyJWTError, KeyError, TypeError, ValueError) as exc:
             raise ValueError("invalid or expired access token") from exc

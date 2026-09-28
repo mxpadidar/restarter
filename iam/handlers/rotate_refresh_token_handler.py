@@ -7,12 +7,15 @@ from core.utils import datetime_to_timestamp, generate_urlsafe_token, get_curren
 from iam.commands import RotateRefreshTokenCommand
 from iam.dtos import TokenPair
 from iam.models import SessionGrant
-from iam.services import JWTService
+from iam.services import JWTService, RoleManager
 
 
 @transaction.atomic
 def handle_rotate_refresh_token_command(
-    cmd: RotateRefreshTokenCommand, hasher: HMACSHA256Hasher, jwt_service: JWTService
+    cmd: RotateRefreshTokenCommand,
+    hasher: HMACSHA256Hasher,
+    jwt_service: JWTService,
+    role_manager: RoleManager,
 ) -> TokenPair:
     """Rotate a refresh token and issue a new access/refresh token pair."""
 
@@ -58,11 +61,13 @@ def handle_rotate_refresh_token_command(
     )
 
     access_exp = now + cmd.access_token_ttl
+    roles = sorted(role.value for role in role_manager.get_roles(grant.user))
 
     return TokenPair.create(
         access_token=jwt_service.encode(
             sub=grant.user.id.hex,
             jti=new_grant.id.hex,
+            roles=roles,
             iat=datetime_to_timestamp(now),
             exp=datetime_to_timestamp(access_exp),
         ),

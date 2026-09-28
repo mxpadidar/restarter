@@ -9,12 +9,15 @@ from core.utils import datetime_to_timestamp, generate_urlsafe_token, get_curren
 from iam.commands import LoginCommand
 from iam.dtos import TokenPair
 from iam.models import SessionGrant, User
-from iam.services import JWTService
+from iam.services import JWTService, RoleManager
 
 
 @transaction.atomic
 def handle_login_command(
-    cmd: LoginCommand, hasher: HMACSHA256Hasher, jwt_service: JWTService
+    cmd: LoginCommand,
+    hasher: HMACSHA256Hasher,
+    jwt_service: JWTService,
+    role_manager: RoleManager,
 ) -> TokenPair:
     """Authenticate a user and create an access/refresh token pair."""
     username = cmd.username.strip().lower()
@@ -39,11 +42,13 @@ def handle_login_command(
     )
 
     access_exp = issued_at + cmd.access_token_ttl
+    roles = sorted(role.value for role in role_manager.get_roles(user))
 
     return TokenPair.create(
         access_token=jwt_service.encode(
             sub=user.id.hex,
             jti=grant.id.hex,
+            roles=roles,
             iat=datetime_to_timestamp(issued_at),
             exp=datetime_to_timestamp(access_exp),
         ),

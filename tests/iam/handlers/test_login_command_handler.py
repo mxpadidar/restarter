@@ -4,6 +4,7 @@ from django.utils import timezone
 from conf.config import Config
 from conf.container import Container
 from core.errors import AuthenticationError
+from core.rbac import Role
 from core.utils import datetime_to_timestamp
 from iam.commands import LoginCommand
 from iam.dtos import TokenPair
@@ -16,6 +17,7 @@ pytestmark = pytest.mark.django_db
 def test_handle_login_command_creates_session_and_tokens(container: Container, config: Config):
     """A valid login should create a session and return both token types."""
     user = User.objects.create_user(username="user", password="strong-password")
+    container.role_manager.assign(user, Role.NORMAL)
 
     result = handle_login_command(
         LoginCommand(
@@ -28,6 +30,7 @@ def test_handle_login_command_creates_session_and_tokens(container: Container, c
         ),
         hasher=container.hmac_hasher,
         jwt_service=container.jwt_service,
+        role_manager=container.role_manager,
     )
 
     grant = SessionGrant.objects.get(user=user)
@@ -41,6 +44,7 @@ def test_handle_login_command_creates_session_and_tokens(container: Container, c
     assert refresh_secret
     assert payload["sub"] == user.id.hex
     assert payload["jti"] == grant.id.hex
+    assert payload["roles"] == [Role.NORMAL.value]
 
 
 def test_handle_login_command_rejects_unknown_username(container: Container, config: Config):
@@ -58,6 +62,7 @@ def test_handle_login_command_rejects_unknown_username(container: Container, con
             ),
             hasher=container.hmac_hasher,
             jwt_service=container.jwt_service,
+            role_manager=container.role_manager,
         )
 
     assert not SessionGrant.objects.exists()
@@ -78,6 +83,7 @@ def test_handle_login_command_rejects_incorrect_password(container: Container, c
             ),
             hasher=container.hmac_hasher,
             jwt_service=container.jwt_service,
+            role_manager=container.role_manager,
         )
 
     assert not SessionGrant.objects.exists()
@@ -100,6 +106,7 @@ def test_handle_login_command_rejects_a_deleted_user(container: Container, confi
             ),
             hasher=container.hmac_hasher,
             jwt_service=container.jwt_service,
+            role_manager=container.role_manager,
         )
 
     assert not SessionGrant.objects.exists()
@@ -122,6 +129,7 @@ def test_handle_login_command_rejects_a_deactivated_user(container: Container, c
             ),
             hasher=container.hmac_hasher,
             jwt_service=container.jwt_service,
+            role_manager=container.role_manager,
         )
 
     assert not SessionGrant.objects.exists()
