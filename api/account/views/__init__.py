@@ -3,6 +3,7 @@ from .logout_view import LogoutView
 from .me_view import MeView
 from .signup_view import SignupView
 from .token_rotation_view import TokenRotationView
+from .user_list_view import UserListView
 
 __all__ = [
     "LoginView",
@@ -10,4 +11,5 @@ __all__ = [
     "MeView",
     "SignupView",
     "TokenRotationView",
+    "UserListView",
 ]

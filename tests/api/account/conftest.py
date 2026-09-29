@@ -3,6 +3,11 @@ from django.urls import reverse
 
 
 @pytest.fixture
+def user_list_url() -> str:
+    return reverse("user-list")
+
+
+@pytest.fixture
 def signup_url() -> str:
     return reverse("signup")
 

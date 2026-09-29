@@ -4,6 +4,7 @@ from .me_serializer import MeResponseSerializer
 from .refresh_token_serializer import RefreshTokenRequestSerializer
 from .signup_serializer import SignupSerializer
 from .token_serializer import TokenPairResponseSerializer
+from .user_serializer import UserSerializer
 
 __all__ = [
     "IDSerializer",
@@ -12,4 +13,5 @@ __all__ = [
     "RefreshTokenRequestSerializer",
     "SignupSerializer",
     "TokenPairResponseSerializer",
+    "UserSerializer",
 ]
