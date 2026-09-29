@@ -11,12 +11,10 @@ def test_resource_wildcard_grants_only_its_resource_permissions():
 
 def test_account_permissions_use_meaningful_action_codes():
     assert UserPerm.CREATE.code == "account:user:create"
-    assert UserPerm.CREATE_SUPERUSER.code == "account:user:create_superuser"
     assert UserPerm.DEACTIVATE.code == "account:user:deactivate"
-    assert UserPerm.SOFT_DELETE.code == "account:user:soft_delete"
     assert UserRolePerm.ASSIGN.code == "account:user_role:assign"
     assert UserRolePerm.REMOVE.code == "account:user_role:remove"
-    assert UserRolePerm.VIEW.code == "account:user_role:view"
+    assert UserRolePerm.READ.code == "account:user_role:read"
 
 
 def test_namespace_permission_check_uses_the_permission_code_prefix():

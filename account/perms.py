@@ -4,17 +4,15 @@ from core.rbac import Perm, Role
 class UserPerm(Perm, resource="user", namespace="account"):
     ALL = "*"
     CREATE = "create"
-    CREATE_SUPERUSER = "create_superuser"
     DEACTIVATE = "deactivate"
-    SOFT_DELETE = "soft_delete"
-    VIEW = "view"
+    READ = "read"
 
 
 class UserRolePerm(Perm, resource="user_role", namespace="account"):
     ALL = "*"
     ASSIGN = "assign"
     REMOVE = "remove"
-    VIEW = "view"
+    READ = "read"
 
 
 ACCOUNT_PERMS: dict[Role, set[str]] = {
