@@ -1,5 +1,5 @@
 import pytest
-from django.test import Client
+from rest_framework.test import APIClient
 
 from core.errors import ErrorCode
 
@@ -7,13 +7,13 @@ pytestmark = pytest.mark.django_db
 
 
 def test_token_rotation_returns_a_new_token_pair(
-    client: Client, token_rotate_url: str, auth_tokens: dict[str, str]
+    api_client: APIClient, token_rotate_url: str, auth_tokens: dict[str, str]
 ):
     refresh_token = auth_tokens["refresh_token"]
-    resp = client.post(
+    resp = api_client.post(
         token_rotate_url,
         data={"refresh_token": refresh_token},
-        content_type="application/json",
+        format="json",
     )
 
     assert resp.status_code == 200
@@ -26,11 +26,11 @@ def test_token_rotation_returns_a_new_token_pair(
     assert resp_data["expires_at"] is not None
 
 
-def test_token_rotation_rejects_invalid_input(client: Client, token_rotate_url: str):
-    resp = client.post(
+def test_token_rotation_rejects_invalid_input(api_client: APIClient, token_rotate_url: str):
+    resp = api_client.post(
         token_rotate_url,
         data={},
-        content_type="application/json",
+        format="json",
     )
 
     assert resp.status_code == 400
@@ -38,11 +38,13 @@ def test_token_rotation_rejects_invalid_input(client: Client, token_rotate_url: 
     assert resp_data["error"]["code"] == ErrorCode.VALIDATION_ERROR
 
 
-def test_token_rotation_rejects_invalid_refresh_tokens(client: Client, token_rotate_url: str):
-    resp = client.post(
+def test_token_rotation_rejects_invalid_refresh_tokens(
+    api_client: APIClient, token_rotate_url: str
+):
+    resp = api_client.post(
         token_rotate_url,
         data={"refresh_token": "invalid-token"},
-        content_type="application/json",
+        format="json",
     )
 
     assert resp.status_code == 401

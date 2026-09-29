@@ -1,5 +1,5 @@
 import pytest
-from django.test import Client
+from rest_framework.test import APIClient
 
 from core.errors import ErrorCode
 
@@ -7,9 +7,9 @@ pytestmark = pytest.mark.django_db
 
 
 def test_login_returns_an_access_and_refresh_token(
-    client: Client, auth_creds: dict[str, str], login_url: str
+    api_client: APIClient, auth_creds: dict[str, str], login_url: str
 ):
-    resp = client.post(login_url, data=auth_creds, content_type="application/json")
+    resp = api_client.post(login_url, data=auth_creds, format="json")
     assert resp.status_code == 200
 
     resp_data = resp.json()
@@ -20,8 +20,8 @@ def test_login_returns_an_access_and_refresh_token(
     assert resp_data["refresh_token"] is not None
 
 
-def test_login_rejects_invalid_input(client: Client, login_url: str):
-    resp = client.post(login_url, data={"username": "user"}, content_type="application/json")
+def test_login_rejects_invalid_input(api_client: APIClient, login_url: str):
+    resp = api_client.post(login_url, data={"username": "user"}, format="json")
     assert resp.status_code == 400
 
     resp_data = resp.json()
@@ -29,12 +29,12 @@ def test_login_rejects_invalid_input(client: Client, login_url: str):
 
 
 def test_login_rejects_invalid_credentials(
-    client: Client, auth_creds: dict[str, str], login_url: str
+    api_client: APIClient, auth_creds: dict[str, str], login_url: str
 ):
-    resp = client.post(
+    resp = api_client.post(
         login_url,
         data={"username": auth_creds["username"], "password": "wrong-password"},
-        content_type="application/json",
+        format="json",
     )
     assert resp.status_code == 401
 

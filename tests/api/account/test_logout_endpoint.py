@@ -1,5 +1,5 @@
 import pytest
-from django.test import Client
+from rest_framework.test import APIClient
 
 from core.errors import ErrorCode
 
@@ -7,25 +7,25 @@ pytestmark = pytest.mark.django_db
 
 
 def test_logout_revokes_the_refresh_token(
-    client: Client,
+    api_client: APIClient,
     logout_url: str,
     token_rotate_url: str,
     auth_tokens: dict[str, str],
 ):
     refresh_token = auth_tokens["refresh_token"]
-    resp = client.post(
+    resp = api_client.post(
         logout_url,
         data={"refresh_token": refresh_token},
-        content_type="application/json",
+        format="json",
     )
 
     assert resp.status_code == 204
     assert resp.content == b""
 
-    resp = client.post(
+    resp = api_client.post(
         token_rotate_url,
         data={"refresh_token": refresh_token},
-        content_type="application/json",
+        format="json",
     )
 
     assert resp.status_code == 401
@@ -33,19 +33,19 @@ def test_logout_revokes_the_refresh_token(
     assert resp_data["error"]["code"] == ErrorCode.AUTHENTICATION_FAILED
 
 
-def test_logout_rejects_invalid_input(client: Client, logout_url: str):
-    resp = client.post(logout_url, data={}, content_type="application/json")
+def test_logout_rejects_invalid_input(api_client: APIClient, logout_url: str):
+    resp = api_client.post(logout_url, data={}, format="json")
 
     assert resp.status_code == 400
     resp_data = resp.json()
     assert resp_data["error"]["code"] == ErrorCode.VALIDATION_ERROR
 
 
-def test_logout_rejects_invalid_refresh_tokens(client: Client, logout_url: str):
-    resp = client.post(
+def test_logout_rejects_invalid_refresh_tokens(api_client: APIClient, logout_url: str):
+    resp = api_client.post(
         logout_url,
         data={"refresh_token": "invalid-token"},
-        content_type="application/json",
+        format="json",
     )
 
     assert resp.status_code == 401

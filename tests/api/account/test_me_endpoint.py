@@ -1,5 +1,5 @@
 import pytest
-from django.test import Client
+from rest_framework.test import APIClient
 
 from account.models import SessionGrant, User
 from core.errors import ErrorCode
@@ -8,13 +8,13 @@ pytestmark = pytest.mark.django_db
 
 
 def test_me_returns_the_authenticated_principal(
-    client: Client,
+    api_client: APIClient,
     me_url: str,
     auth_creds: dict[str, str],
     auth_tokens: dict[str, str],
 ):
     access_token = auth_tokens["access_token"]
-    resp = client.get(me_url, HTTP_AUTHORIZATION=f"Bearer {access_token}")
+    resp = api_client.get(me_url, HTTP_AUTHORIZATION=f"Bearer {access_token}")
 
     assert resp.status_code == 200
     resp_data = resp.json()
@@ -28,16 +28,16 @@ def test_me_returns_the_authenticated_principal(
     assert grant.issued_at.isoformat().startswith(resp_data["last_login"].replace("Z", "+00:00"))
 
 
-def test_me_rejects_an_unauthenticated_request(client: Client, me_url: str):
-    resp = client.get(me_url)
+def test_me_rejects_an_unauthenticated_request(api_client: APIClient, me_url: str):
+    resp = api_client.get(me_url)
 
     assert resp.status_code == 401
     resp_data = resp.json()
     assert resp_data["error"]["code"] == ErrorCode.AUTHENTICATION_FAILED
 
 
-def test_me_rejects_an_invalid_access_token(client: Client, me_url: str):
-    resp = client.get(me_url, HTTP_AUTHORIZATION="Bearer invalid-token")
+def test_me_rejects_an_invalid_access_token(api_client: APIClient, me_url: str):
+    resp = api_client.get(me_url, HTTP_AUTHORIZATION="Bearer invalid-token")
 
     assert resp.status_code == 401
     resp_data = resp.json()
@@ -45,7 +45,7 @@ def test_me_rejects_an_invalid_access_token(client: Client, me_url: str):
 
 
 def test_me_rejects_a_revoked_session_grant(
-    client: Client,
+    api_client: APIClient,
     me_url: str,
     auth_creds: dict[str, str],
     auth_tokens: dict[str, str],
@@ -55,7 +55,7 @@ def test_me_rejects_a_revoked_session_grant(
     grant = SessionGrant.objects.get(user=user, revoked_at__isnull=True)
     grant.revoke()
 
-    resp = client.get(me_url, HTTP_AUTHORIZATION=f"Bearer {access_token}")
+    resp = api_client.get(me_url, HTTP_AUTHORIZATION=f"Bearer {access_token}")
 
     assert resp.status_code == 401
     resp_data = resp.json()

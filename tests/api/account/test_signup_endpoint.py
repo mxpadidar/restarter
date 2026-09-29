@@ -1,18 +1,18 @@
 from uuid import UUID
 
 import pytest
-from django.test import Client
+from rest_framework.test import APIClient
 
 from core.errors import ErrorCode
 
 pytestmark = pytest.mark.django_db
 
 
-def test_signup_creates_a_user(client: Client, signup_url: str):
-    resp = client.post(
+def test_signup_creates_a_user(api_client: APIClient, signup_url: str):
+    resp = api_client.post(
         signup_url,
         data={"username": "  New-User  ", "password": "test-password"},
-        content_type="application/json",
+        format="json",
     )
     assert resp.status_code == 201
 
@@ -21,11 +21,11 @@ def test_signup_creates_a_user(client: Client, signup_url: str):
     assert UUID(resp_data["id"]).version == 7
 
 
-def test_signup_rejects_invalid_input(client: Client, signup_url: str):
-    resp = client.post(
+def test_signup_rejects_invalid_input(api_client: APIClient, signup_url: str):
+    resp = api_client.post(
         signup_url,
         data={"username": "new-user", "password": "short"},
-        content_type="application/json",
+        format="json",
     )
     assert resp.status_code == 400
 
@@ -33,18 +33,18 @@ def test_signup_rejects_invalid_input(client: Client, signup_url: str):
     assert resp_data["error"]["code"] == ErrorCode.VALIDATION_ERROR
 
 
-def test_signup_rejects_an_existing_username(client: Client, signup_url: str):
-    success_resp = client.post(
+def test_signup_rejects_an_existing_username(api_client: APIClient, signup_url: str):
+    success_resp = api_client.post(
         signup_url,
         data={"username": "existing-user", "password": "test-password"},
-        content_type="application/json",
+        format="json",
     )
     assert success_resp.status_code == 201
 
-    resp = client.post(
+    resp = api_client.post(
         signup_url,
         data={"username": " Existing-User ", "password": "another-password"},
-        content_type="application/json",
+        format="json",
     )
     assert resp.status_code == 409
 
